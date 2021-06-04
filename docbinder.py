@@ -6,6 +6,7 @@ if os.name == "nt":
     import win32com.client
 
 import re
+import pprint
 
 from apphandler import AppHandlerFactory
 
@@ -19,6 +20,8 @@ class DocBinder():
 
     def __init__(self, mock = False):
         self._mock = mock
+        self._openbinders()
+
         self._ahf = AppHandlerFactory(mock)
         if(self._mock):
             self._winlistmock = ['210426%20Clilent%20Dashboard%20Mock-up%20draft (version 1).xlsb  -  AutoRecovered - Excel',
@@ -27,6 +30,9 @@ class DocBinder():
                         'How_to_Manage.pptx  -  Protected View - PowerPoint',
                         'Sample presentation.pptx  -  2 - PowerPoint',
                         'Sample presentation.pptx  -  1 - PowerPoint']
+
+    def __del__(self):
+        self._savebinders()
 
     def _getfilename(self, win, app):
         # Remove the app name from the title
@@ -50,8 +56,6 @@ class DocBinder():
         else:
             self._winlist = []
             win32gui.EnumWindows( self._winEnumHandler, None )
-    
-        
     
         doclist = []
         for win in self._winlist:
@@ -78,6 +82,18 @@ class DocBinder():
         print("Workspace {}".format(workspace))
         for idx, file in enumerate(wsfiles):
             print('{}: {}'.format(idx, file['filename']))
+
+    def _savebinders(self):
+        with open('docbinder.json','w') as output: 
+            output.write(pprint.pformat(self._workspaces))
+
+    def _openbinders(self):
+        try:
+            with open('docbinder.json') as json_file:
+                self._workspaces = json.load(json_file)        
+        except:
+            # If JSON file doesn't exist
+            pass
 
     def listdocs(self):
         self._doclist = self._getdoclist()
@@ -151,12 +167,12 @@ class DocBinder():
             print('Deleted workspace {}'.format(workspace))
 
 def _dbtest():
-    print("Running tests")
+    print("Running _dbtest")
     db = DocBinder(mock=True)
-    # print(db._getdoclist())
     db.list()
     db.listdocs()
     db.add('CFO',(1,2,5))
+    db.add('revenue',[1,2])
     db.list()
     db.delete('CFO')
     db.add('CFO',(1,2,5))
@@ -164,5 +180,17 @@ def _dbtest():
     db.list('CFO')
     db.delete('CFO')
 
+def _dbpersisttest():
+    print("Running _dbpersisttest()")
+    db = DocBinder(mock=True)
+    db.listdocs()
+    db.add('CFO',(1,2,5))
+    db.add('revenue',[1,2])
+    del db
+
+    db2 = DocBinder(mock=True)
+    db2.listdocs()
+    db2.add('three',[3])
+
 if __name__ == "__main__":
-    _dbtest()
+    _dbpersisttest()
