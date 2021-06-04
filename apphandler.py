@@ -1,4 +1,6 @@
-from win32com.client import Dispatch
+import os
+if os.name == "nt":
+    from win32com.client import Dispatch
 
 # TODO: https://stackoverflow.com/questions/15162954/python-win32com-check-if-program-is-open
 class AppHandler():

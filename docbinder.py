@@ -1,7 +1,10 @@
 #TODO: Handle unsaved files
 # DocBinder imports
-import win32gui
-import win32com.client
+import os
+if os.name == "nt":
+    import win32gui
+    import win32com.client
+
 import re
 
 from apphandler import AppHandlerFactory
