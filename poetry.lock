@@ -1,0 +1,21 @@
+[[package]]
+category = "main"
+description = "Python for Window Extensions"
+name = "win32core"
+optional = false
+python-versions = "*"
+version = "221.36"
+
+[metadata]
+content-hash = "c2925978aaff69bf14c35d80e64ec87459fbb50304cc3a7f3bd02909bcde5475"
+python-versions = "^3.8"
+
+[metadata.files]
+win32core = [
+    {file = "win32core-221.36-cp34-cp34m-win32.whl", hash = "sha256:88e293e959dc5c50af3a9053cc7ac35273936080752316d4231b345cbc3c1b54"},
+    {file = "win32core-221.36-cp34-cp34m-win_amd64.whl", hash = "sha256:57ebeea7ba14117713ddca3db6bdca57703b81792c5c7f743f35b9313461532a"},
+    {file = "win32core-221.36-cp35-cp35m-win32.whl", hash = "sha256:934ab3759403909327c8c8c85d3cee15da67282311f328591d74a2f25260b0f6"},
+    {file = "win32core-221.36-cp35-cp35m-win_amd64.whl", hash = "sha256:d2132324bd38704f040fbd9e23bc1ecb0f4bcb51354e9f2a93135bdc336d667d"},
+    {file = "win32core-221.36-cp36-cp36m-win32.whl", hash = "sha256:face47b84e63fd9e9d8457d5917ca83b3d1ceaf07503ab3ca9ef426a2ee119f9"},
+    {file = "win32core-221.36-cp36-cp36m-win_amd64.whl", hash = "sha256:92fafd29427a9f1cacba2017f2a24ff31cf09c2e57ac6990703248ab4bb460d1"},
+]
