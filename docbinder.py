@@ -12,7 +12,8 @@ from apphandler import AppHandlerFactory
 
 class DocBinder():
     
-    _doclist = []
+    _doclist = {}
+    _docindex = []
     _winlist = []
     _winlistmock = []
     _mock = False
@@ -28,8 +29,8 @@ class DocBinder():
                         'Weekly Executive Report - Consolidated Numbers.xlsx - Excel',
                         '2021 Target Export.xlsx - Excel',
                         'How_to_Manage.pptx  -  Protected View - PowerPoint',
-                        'Sample presentation.pptx  -  2 - PowerPoint',
-                        'Sample presentation.pptx  -  1 - PowerPoint']
+                        'Sample presentation.pptx - PowerPoint',
+                        'Sample presentation 2.pptx - PowerPoint']
 
     def __del__(self):
         self._savebinders()
@@ -57,7 +58,7 @@ class DocBinder():
             self._winlist = []
             win32gui.EnumWindows( self._winEnumHandler, None )
     
-        doclist = []
+        docdict = {}
         for win in self._winlist:
             for app in self._ahf.applist():
                 if ' - ' + app in win:
@@ -73,9 +74,9 @@ class DocBinder():
                         else:
                             path = ""
                           
-                        doclist.append({"app": app, "winname": win, "path": path, "filename": matches[0], "modifier": modifier})
+                        docdict[matches[0]] = {"app": app, "winname": win, "path": path, "filename": matches[0], "modifier": modifier}
         
-        return doclist
+        return docdict
 
     def _printworkspace(self, workspace):
         wsfiles = self._workspaces[workspace]
@@ -97,7 +98,9 @@ class DocBinder():
 
     def listdocs(self):
         self._doclist = self._getdoclist()
-        for idx, doc in enumerate(self._doclist):
+        self._docindex = list(self._doclist.keys())
+        for idx, key in enumerate(self._doclist):
+            doc = self._doclist[key]
             print("{}: {}    {}   [{}]".format(idx, doc['filename'], doc['modifier'], doc.get('workspace')))
 
     def clean(self, workspace = None):
@@ -138,7 +141,8 @@ class DocBinder():
             wsfiles = self._workspaces[workspace]
 
         for filenum in filelist:
-            file = self._doclist[filenum]
+            key = self._docindex[filenum]
+            file = self._doclist[key]
             if file in wsfiles:
                 print(' [SKIPPED] {} (already exists)'.format(file['filename']))
             else:
