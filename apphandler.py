@@ -2,8 +2,9 @@ import os
 if os.name == "nt":
     from win32com.client import Dispatch
 
-# TODO: https://stackoverflow.com/questions/15162954/python-win32com-check-if-program-is-open
 class AppHandler():
+    ''' Base class for the class to handle getting path information and opening files '''
+
 
     def __init__(self):
         pass
@@ -21,16 +22,15 @@ class XLSHandler(AppHandler):
         self._xl = Dispatch('Excel.Application')
 
     def getpath(self, doc):
-        # https://gist.github.com/mikepsn/27dd0d768ccede849051
-        # Funnel Data Mapping.xlsx
-        # Dashboard Master v2.xlsm
+        # Thanks to the example at https://gist.github.com/mikepsn/27dd0d768ccede849051
         return self._xl.Workbooks(doc).Path
         
     def openfile(self, path, filename):
         fqpath = '"{}/{}"'.format(path, filename)
         print(" [OPENING] {}".format(filename))
         self._xl.Workbooks.Open("{}".format(fqpath))
-        
+
+
 class PPTHandler(AppHandler):
 
     def __init__(self):
@@ -43,6 +43,7 @@ class PPTHandler(AppHandler):
         fqpath = '"{}/{}"'.format(path, filename)
         print(" [OPENING] {}".format(filename))
         self._pp.Presentations.Open("{}".format(fqpath))
+
 
 class DOCHandler(AppHandler):
 
@@ -69,9 +70,9 @@ class MOCKHandler(AppHandler):
         fqpath = '"{}/{}"'.format(path, filename)
         print(" [MOCK--OPENING] {}".format(filename))
 
+
 class AppHandlerFactory():
 
-    # https://stackoverflow.com/questions/1208322/dictionary-with-classes
     _appdict = {"Excel": XLSHandler,
                 "PowerPoint": PPTHandler,
                 "Word": DOCHandler
@@ -89,4 +90,5 @@ class AppHandlerFactory():
         return self._appdict.keys()
         
     def gethandler(self, app):
+        ''' Returns the class to handle a given file type '''
         return self._appdict[app]()

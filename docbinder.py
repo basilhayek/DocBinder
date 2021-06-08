@@ -1,12 +1,10 @@
-#TODO: Handle unsaved files
-# DocBinder imports
 import os
 if os.name == "nt":
     import win32gui
     import win32com.client
 
-import re
-import pprint
+import re       # For parsing filenames
+import pprint   # For saving to file
 
 from apphandler import AppHandlerFactory
 
@@ -78,6 +76,12 @@ class DocBinder():
         
         return docdict
 
+    def _workspacevalid(self, workspace):
+        if self._workspaces.get(workspace) is None:
+            print("No workspace {}".format(workspace))
+            return False
+        return True
+
     def _printworkspace(self, workspace):
         wsfiles = self._workspaces[workspace]
         print("Workspace {}".format(workspace))
@@ -103,32 +107,39 @@ class DocBinder():
             doc = self._doclist[key]
             print("{}: {}    {}   [{}]".format(idx, doc['filename'], doc['modifier'], doc.get('workspace')))
 
-    def clean(self, workspace = None):
+    def clean(self, workspace):
         ''' Update the indicated workspace to reflect files that were closed '''
-        ''' Passing in an empty string cleans the last workspace '''
-        ''' { "workspaces": [{"workspace":"cfo","files":[{"app":"Excel","filename":"filename","path":"path"}]}]} '''
-        pass
+        if self._workspacevalid(workspace):
+            print("Cleaning workspace {}".format(workspace))
+            wsfiles = self._workspaces[workspace]
+            docdict = self._getdoclist()
+            for idx, wsfile in enumerate(wsfiles):
+                if docdict.get(wsfile['filename']) is None:
+                    print(" [REMOVING] {}".format(wsfile['filename']))
+                    del wsfiles[idx]           
 
-    def update(self, workspace = None):
+    def cleanall(self):
+        ''' Cleans all active workspaces '''
+        for ws in self._workspaces.keys():
+            self.clean(ws)
+
+    def update(self, workspace):
         ''' Update the indicated workspace by prompting to add files not in a list to a workspace '''
-        ''' Passing in an empty string updates the last workspace '''
         pass
         
     def open(self, workspace):
         ''' Open the files belonging to the associated workspace '''
-        if self._workspaces.get(workspace) is None:
-            print("No workspace {}".format(workspace))
-            return
-
-        print("Opening workspace {}".format(workspace))
-        wsfiles = self._workspaces[workspace]
-        for wsfile in wsfiles:
-            if wsfile["app"] in self._ahf.applist():
-                self._ahf.gethandler(wsfile["app"]).openfile(wsfile["path"], wsfile["filename"])
+        if self._workspacevalid(workspace):
+            print("Opening workspace {}".format(workspace))
+            wsfiles = self._workspaces[workspace]
+            for wsfile in wsfiles:
+                if wsfile["app"] in self._ahf.applist():
+                    self._ahf.gethandler(wsfile["app"]).openfile(wsfile["path"], wsfile["filename"])
          
     def openall(self):
         ''' Opens all saved workspaces '''
-        pass
+        for ws in self._workspaces.keys():
+            self.open(ws)
         
     def add(self, workspace, filelist):
         ''' Add files to a workspace '''
@@ -158,15 +169,12 @@ class DocBinder():
                     self._printworkspace(workspace)
             else:
                 print("No workspaces created")
-        else:
-            if workspace in self._workspaces:
-                self._printworkspace(workspace)
-            else:
-                print('Workspace {} does not exist'.format(workspace))
+        elif self._workspacevalid(workspace):
+            self._printworkspace(workspace)
         
     def delete(self, workspace):
         ''' Delete a workspace '''
-        if workspace in self._workspaces:
+        if self._workspacevalid(workspace):
             del self._workspaces[workspace]
             print('Deleted workspace {}'.format(workspace))
 
@@ -194,7 +202,20 @@ def _dbpersisttest():
 
     db2 = DocBinder(mock=True)
     db2.listdocs()
+    db2.openall()
     db2.add('three',[3])
 
+def _dbcleantest():
+    db = DocBinder(mock=True)
+    db.listdocs()
+    db.add('CFO',(1,2,5))
+    db.add('revenue',[1,2])
+    del db._winlistmock[1]
+    db.list()
+    db.cleanall()
+    db.list()
+    db.clean('CFO')
+
+
 if __name__ == "__main__":
-    _dbpersisttest()
+    _dbcleantest()
